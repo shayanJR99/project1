@@ -1,21 +1,40 @@
 # -*- coding: utf-8 -*-
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
-from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import A4
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.units import inch
+import arabic_reshaper
+from bidi.algorithm import get_display
 
-file_path = "/mnt/data/تاریخ_افغانستان_پس_از_جدایی_از_ایران.pdf"
-doc = SimpleDocTemplate(file_path, pagesize=A4)
+# مسیر خروجی PDF
+output_pdf = "/home/shayanjr/programing/project1/files/afghanisstan.pdf"
+
+# ثبت فونت فارسی
+pdfmetrics.registerFont(
+    TTFont("Vazir", "/project1/files/fonts/Vazirmatn-Regular.ttf")
+)
+
+# استایل‌ها با فونت فارسی
+title_style = ParagraphStyle('title', fontName='Vazir', fontSize=18, leading=22)
+section_style = ParagraphStyle('section', fontName='Vazir', fontSize=14, leading=18)
+normal_style = ParagraphStyle('normal', fontName='Vazir', fontSize=12, leading=16)
+
+# تابع برای راست‌به‌چپ کردن متن فارسی
+def fix_rtl(text):
+    reshaped_text = arabic_reshaper.reshape(text)
+    return get_display(reshaped_text)
+
+# ایجاد سند
+doc = SimpleDocTemplate(output_pdf, pagesize=A4)
 elements = []
 
-styles = getSampleStyleSheet()
-title_style = styles["Heading1"]
-section_style = styles["Heading2"]
-normal_style = styles["BodyText"]
-
-elements.append(Paragraph("تاریخ افغانستان پس از جدایی از ایران", title_style))
+# عنوان اصلی
+elements.append(Paragraph(fix_rtl("تاریخ افغانستان پس از جدایی از ایران"), title_style))
 elements.append(Spacer(1, 0.3 * inch))
 
+# بخش‌ها و محتوا
 sections = {
 "۱) شکل‌گیری افغانستان مستقل (۱۷۴۷–۱۸۲۳)": """
 پس از فروپاشی دولت صفویه و دوره آشوب در ایران، احمدشاه درانی در سال ۱۷۴۷ میلادی حکومت مستقلی را پایه‌گذاری کرد که هسته اصلی افغانستان امروزی شد. 
@@ -78,12 +97,14 @@ sections = {
 """
 }
 
+# اضافه کردن بخش‌ها به سند
 for title, content in sections.items():
-    elements.append(Paragraph(title, section_style))
+    elements.append(Paragraph(fix_rtl(title), section_style))
     elements.append(Spacer(1, 0.2 * inch))
-    elements.append(Paragraph(content, normal_style))
+    elements.append(Paragraph(fix_rtl(content), normal_style))
     elements.append(Spacer(1, 0.4 * inch))
 
+# ساخت PDF
 doc.build(elements)
 
-file_path
+print("PDF ساخته شد:", output_pdf)
