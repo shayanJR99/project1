@@ -7,6 +7,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import inch
+from reportlab.lib.enums import TA_RIGHT
 import arabic_reshaper
 from bidi.algorithm import get_display
 
@@ -39,21 +40,24 @@ title_style = ParagraphStyle(
     name="Title",
     fontName="Vazir",
     fontSize=18,
-    leading=22
+    leading=22,
+    alignment=TA_RIGHT   # راست‌چین
 )
 
 section_style = ParagraphStyle(
     name="Section",
     fontName="Vazir",
     fontSize=14,
-    leading=18
+    leading=18,
+    alignment=TA_RIGHT   # راست‌چین
 )
 
 normal_style = ParagraphStyle(
     name="Normal",
     fontName="Vazir",
     fontSize=12,
-    leading=16
+    leading=16,
+    alignment=TA_RIGHT   # راست‌چین
 )
 
 
@@ -61,9 +65,9 @@ normal_style = ParagraphStyle(
 # تابع اصلاح RTL
 # -----------------------------
 def fix_rtl(text: str) -> str:
-    reshaped = arabic_reshaper.reshape(text)
-    return get_display(reshaped)
-
+    reshaped_text = arabic_reshaper.reshape(text)
+    bidi_text = get_display(reshaped_text)
+    return bidi_text
 
 # -----------------------------
 # ساخت سند
